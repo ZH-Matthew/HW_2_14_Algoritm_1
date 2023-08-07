@@ -135,4 +135,9 @@ class IntegerListImplTest {
         assertEquals(Arrays.toString(ARR_1), Arrays.toString(service.goSortInsertionForTest(ARR_2)));
     }
 
+    @Test
+    void sort() {
+        assertEquals(Arrays.toString(ARR_1), Arrays.toString(service.goSortForTest(ARR_2)));
+    }
+
 }

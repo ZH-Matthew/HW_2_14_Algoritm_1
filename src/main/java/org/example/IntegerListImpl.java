@@ -3,12 +3,11 @@ package org.example;
 import org.example.Exception.ElementNotFoundException;
 import org.example.Exception.InvalidIndexException;
 import org.example.Exception.NullItemException;
-import org.example.Exception.StorageIsFullException;
 
 import java.util.Arrays;
 
-public class IntegerListImpl implements IntegerList{
-    private final Integer[] storage;
+public class IntegerListImpl implements IntegerList {
+    private Integer[] storage;
 
     private int size;
 
@@ -18,15 +17,15 @@ public class IntegerListImpl implements IntegerList{
 
     private final Integer[] arr = new Integer[100000];  // для тестов скорости сортировки
 
-    public void fillArray(){                           // для заполнения массива рандомными числами
+    public void fillArray() {                           // для заполнения массива рандомными числами
         for (int i = 0; i < arr.length; i++) {
-            arr[i] = ((int)(Math.random() * 100000));
+            arr[i] = ((int) (Math.random() * 100000));
         }
     }
 
     @Override
     public Integer add(Integer item) {
-        validateSize();
+        growIfNeeded();
         validateItem(item);
         storage[size++] = item;
         return item;
@@ -34,7 +33,7 @@ public class IntegerListImpl implements IntegerList{
 
     @Override
     public Integer add(int index, Integer item) {
-        validateSize();
+        growIfNeeded();
         validateItem(item);
         validateIndex(index);
 
@@ -145,9 +144,9 @@ public class IntegerListImpl implements IntegerList{
 
     }
 
-    private void validateSize() {
+    private void growIfNeeded() {
         if (size == storage.length) {
-            throw new StorageIsFullException();
+            grow();
         }
 
     }
@@ -159,25 +158,65 @@ public class IntegerListImpl implements IntegerList{
 
     }
 
-    public long checkBubble(){
-        fillArray();
-        long start = System.currentTimeMillis();
-        sortBubble(arr);
-        return System.currentTimeMillis() - start;
+    private boolean contains(Integer[] arr, Integer element) {
+        int min = 0;
+        int max = arr.length - 1;
+
+        while (min <= max) {
+            int mid = (min + max) / 2;
+
+            if (element.equals(arr[mid])) {
+                return true;
+            }
+
+            if (element < arr[mid]) {
+                max = mid - 1;
+            } else {
+                min = mid + 1;
+            }
+        }
+        return false;
     }
 
-    public long checkSelection(){
-        fillArray();
-        long start = System.currentTimeMillis();
-        sortSelection(arr);
-        return System.currentTimeMillis() - start;
+    @Override
+    public boolean contains(Integer item) {
+        sortInsertion(storage);
+        return contains(storage, item);
     }
 
-    public long checkInsertion(){
-        fillArray();
-        long start = System.currentTimeMillis();
-        sortInsertion(arr);
-        return System.currentTimeMillis() - start;
+    private void grow() {
+        storage = Arrays.copyOf(storage, size + size / 2);
+    }
+
+    public static void quickSort(Integer[] arr, int begin, int end) {
+        if (begin < end) {
+            int partitionIndex = partition(arr, begin, end);
+
+            quickSort(arr, begin, partitionIndex - 1);
+            quickSort(arr, partitionIndex + 1, end);
+        }
+    }
+
+    private static int partition(Integer[] arr, int begin, int end) {
+        int pivot = arr[end];
+        int i = (begin - 1);
+
+        for (int j = begin; j < end; j++) {
+            if (arr[j] <= pivot) {
+                i++;
+
+                swapElements(arr, i, j);
+            }
+        }
+
+        swapElements(arr, i + 1, end);
+        return i + 1;
+    }
+
+    private static void swapElements(Integer[] arr, int left, int right) {
+        int temp = arr[left];
+        arr[left] = arr[right];
+        arr[right] = temp;
     }
 
     private void sortBubble(Integer[] arr) {
@@ -214,40 +253,41 @@ public class IntegerListImpl implements IntegerList{
         }
     }
 
-    private void swapElements(Integer[] arr, int indexA, int indexB) {
-        int tmp = arr[indexA];
-        arr[indexA] = arr[indexB];
-        arr[indexB] = tmp;
+    private void sort(Integer[] arr) {
+        quickSort(arr, 0, arr.length - 1);
     }
+
     @Override
-    public Integer[] goSortInsertionForTest(Integer[] arr){
+    public Integer[] goSortInsertionForTest(Integer[] arr) {
         sortInsertion(arr);
         return arr;
     }
 
-    private boolean contains(Integer[] arr, Integer element) {
-        int min = 0;
-        int max = arr.length - 1;
-
-        while (min <= max) {
-            int mid = (min + max) / 2;
-
-            if (element.equals(arr[mid])) {
-                return true;
-            }
-
-            if (element < arr[mid]) {
-                max = mid - 1;
-            } else {
-                min = mid + 1;
-            }
-        }
-        return false;
-    }
     @Override
-    public boolean contains(Integer item) {
-        sortInsertion(storage);
-        return contains(storage,item);
+    public Integer[] goSortForTest(Integer[] arr) {
+        sort(arr);
+        return arr;
+    }
+
+    public long checkBubble() {
+        fillArray();
+        long start = System.currentTimeMillis();
+        sortBubble(arr);
+        return System.currentTimeMillis() - start;
+    }
+
+    public long checkSelection() {
+        fillArray();
+        long start = System.currentTimeMillis();
+        sortSelection(arr);
+        return System.currentTimeMillis() - start;
+    }
+
+    public long checkInsertion() {
+        fillArray();
+        long start = System.currentTimeMillis();
+        sortInsertion(arr);
+        return System.currentTimeMillis() - start;
     }
 
 }

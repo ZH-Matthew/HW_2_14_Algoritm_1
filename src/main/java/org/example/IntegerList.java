@@ -40,5 +40,7 @@ public interface IntegerList {
 
     Integer[] toArray();
 
+    Integer[] goSortForTest(Integer[] arr);
+
     Integer[] goSortInsertionForTest(Integer[] arr);
 }
